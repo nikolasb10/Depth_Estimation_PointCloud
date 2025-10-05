@@ -1,0 +1,43 @@
+[project]
+name = "depth-estimation-pointcloud"
+version = "0.1.0"
+description = "Real-time depth estimation from monocular images with point cloud visualization"
+authors = [
+    {name = "Nikolaos Benetos", email = "nkbenetos@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=1.9.0",
+    "torchvision>=0.10.0",
+    "opencv-python>=4.5.0",
+    "numpy>=1.21.0",
+    "matplotlib>=3.4.0",
+    "Pillow>=8.0.0",
+    "streamlit>=1.20.0",
+    "open3d>=0.15.0",
+    "transformers>=4.20.0",
+    "timm>=0.6.0",
+    "kaggle>=1.7.4.5",
+    "psutil>=5.8.0",
+    "pandas>=1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black>=21.0",
+    "isort>=5.0",
+    "flake8>=3.8",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"

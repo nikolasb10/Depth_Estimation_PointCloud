@@ -1,0 +1,3 @@
+model_name,model_display_name,model_load_time,model_memory_mb,avg_inference_time,min_inference_time,max_inference_time,std_inference_time,avg_memory_peak_mb,max_memory_peak_mb,images_processed,fps,device
+Intel/dpt-large,DPT-Large (Highest Quality),1.54150390625,6.5,9.502909302711487,8.756255388259888,10.205878973007202,0.5843394313375025,2.40625,8.75,4,0.10523093172263233,cpu
+Intel/dpt-hybrid-midas,DPT-Hybrid (Balanced),1.213209629058838,12.50390625,2.1751132011413574,2.1136951446533203,2.2543153762817383,0.054451714600996536,0.0,0.0,4,0.45974618676180407,cpu
