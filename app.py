@@ -10,6 +10,9 @@ import tempfile
 import os
 import sys
 from pathlib import Path
+import plotly.graph_objects as go
+import plotly.express as px
+import time
 
 # Add src directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
@@ -17,6 +20,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from depth_estimator import DepthEstimator
 from pointcloud_generator import PointCloudGenerator
 from model_benchmarker import ModelBenchmarker
+from video_app_component import render_video_depth_reconstruction
+from about import render_about
+
+# Try to import KITTI loader, fallback if not available
+try:
+    from kitti_dataset_loader import KITTIDatasetLoader
+    KITTI_AVAILABLE = True
+except ImportError:
+    KITTI_AVAILABLE = False
+    KITTIDatasetLoader = None
 
 
 # Configure Streamlit page
@@ -62,6 +75,15 @@ def check_model_availability():
 def load_pointcloud_generator():
     """Load and cache the point cloud generator."""
     return PointCloudGenerator()
+
+
+# Initialize session state for video processing
+if 'video_processor' not in st.session_state:
+    st.session_state.video_processor = None
+if 'processing_results' not in st.session_state:
+    st.session_state.processing_results = None
+if 'video_model_loaded' not in st.session_state:
+    st.session_state.video_model_loaded = False
 
 
 def main():
@@ -136,7 +158,7 @@ def main():
         pcg = load_pointcloud_generator()
     
     # Main interface tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📷 Single Image", "📊 Model Comparison", "🎥 Webcam (Coming Soon)", "ℹ️ About"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📷 Single Image", "📊 Model Comparison", " Point cloud visualization", "🎥 Webcam (Coming Soon)", "ℹ️ About"])
     
     with tab1:
         st.header("Upload Image for Depth Estimation")
@@ -215,6 +237,7 @@ def main():
             
             # Process depth estimation
             with st.spinner("Estimating depth..."):
+                import tempfile  # Ensure tempfile is available in local scope
                 # Convert PIL to numpy
                 image_np = np.array(image)
                 
@@ -485,8 +508,20 @@ def main():
                     except Exception as e:
                         st.error(f"❌ Benchmark failed: {str(e)}")
                         st.exception(e)
-    
+
     with tab3:
+        # Store the selected model in session state so the component can access it
+        st.session_state.selected_model = selected_model
+        
+        # Import and render point cloud component
+        try:
+            from components.point_cloud_component import render_point_cloud_component
+            render_point_cloud_component()
+        except ImportError as e:
+            st.error(f"Failed to load point cloud component: {e}")
+            st.info("Please ensure the point cloud component is properly set up.")
+    
+    with tab4:
         st.header("🎥 Real-time Webcam Processing")
         st.info("Webcam processing will be available in a future update. Currently supports image upload only.")
         
@@ -499,60 +534,8 @@ def main():
         - Export video with depth overlay
         """)
     
-    with tab3:
-        st.header("About This Application")
-        
-        st.markdown("""
-        ### 🔍 Depth Estimation & Point Cloud Visualization
-        
-        This application demonstrates advanced computer vision techniques for:
-        
-        **Depth Estimation:**
-        - Uses state-of-the-art MiDaS and DPT models
-        - Estimates depth from single monocular images
-        - Supports multiple model architectures for different speed/quality trade-offs
-        
-        **Point Cloud Generation:**
-        - Converts 2D images + depth maps into 3D point clouds
-        - Includes color information from original images
-        - Supports downsampling and filtering for optimization
-        
-        **Key Features:**
-        - Multiple pre-trained depth estimation models
-        - Interactive parameter tuning
-        - Export capabilities (depth maps, point clouds)
-        - Optimized for both quality and performance
-        
-        ### 🛠️ Technical Details
-        
-        **Models Used:**
-        - **DPT-Large**: Highest quality, uses Vision Transformer architecture
-        - **DPT-Hybrid**: Balanced performance and speed
-        - **MiDaS-Small**: Fastest inference, good for real-time applications
-        
-        **Libraries:**
-        - PyTorch & Transformers for deep learning
-        - Open3D for 3D point cloud processing
-        - OpenCV for image processing
-        - Streamlit for web interface
-        
-        ### 👨‍💻 About the Developer
-        
-        **Nikolaos Benetos**
-        - AI Engineer at Accenture
-        - ECE Graduate from NTUA
-        - Focus: Computer Vision, Machine Learning, Robotics
-        - [GitHub](https://github.com/nikolasb10) | [LinkedIn](https://linkedin.com/in/nikolasbenetos)
-        
-        ### 📚 Applications
-        
-        This technology is valuable for:
-        - **Robotics**: Navigation, obstacle avoidance, SLAM
-        - **Autonomous Vehicles**: Depth perception, 3D mapping
-        - **AR/VR**: Scene understanding, occlusion handling
-        - **3D Reconstruction**: Creating 3D models from 2D images
-        - **Medical Imaging**: Volumetric analysis, surgical planning
-        """)
+    with tab5:
+        render_about()
 
 
 if __name__ == "__main__":

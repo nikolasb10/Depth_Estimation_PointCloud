@@ -303,7 +303,7 @@ def main():
         
         # Generate point cloud
         print("4. Converting to 3D point cloud...")
-        pointcloud = pcg.depth_to_pointcloud(original_image, depth_map, max_depth=10.0)
+        pointcloud = pcg.depth_to_pointcloud(original_image, depth_map, max_depth=30.0)
         
         print(f"   - Generated {len(pointcloud.points):,} points")
         print(f"   - Point cloud has colors: {pointcloud.has_colors()}")
